@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>👥 User Management</h1>
+    <p>Manage Mystery Digits users</p>
+</div>
+
+<div class="content">
+    <div class="admin-section">
+        <h3>Registered Users ({{ users|length }})</h3>
+        
+        <div class="users-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Last Login</th>
+                        <th>Games</th>
+                        <th>Total Score</th>
+                        <th>Avg Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_data in users %}
+                    {% set user = user_data.user %}
+                    {% set stats = user_data.stats %}
+                    <tr>
+                        <td>
+                            <strong>{{ user.username }}</strong>
+                            {% if user.is_admin %}
+                            <span style="color: #e74c3c; font-size: 0.8em;">(Admin)</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_admin %}
+                            <span style="color: #e74c3c;">Administrator</span>
+                            {% else %}
+                            <span style="color: #27ae60;">User</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
+                        <td>{{ stats.total_games }}</td>
+                        <td>{{ stats.total_score }}</td>
+                        <td>{{ stats.avg_score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('admin_dashboard') }}" class="submit-btn">← Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+.users-table {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+</style>
+{% endblock %}

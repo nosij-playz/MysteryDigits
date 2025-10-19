@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>⚙️ Admin Dashboard</h1>
+    <p>Mystery Digits Administration Panel</p>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <div>Total Users</div>
+        <div class="stat-value">{{ total_users }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Total Games</div>
+        <div class="stat-value">{{ total_games }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Total Score</div>
+        <div class="stat-value">{{ total_score }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Avg Score</div>
+        <div class="stat-value">{{ avg_score }}</div>
+    </div>
+</div>
+
+<div class="content">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="admin-section">
+            <h3>📈 Quick Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ daily_games }}</div>
+                    <div class="stat-label">Games Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_users }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_games }}</div>
+                    <div class="stat-label">Total Games</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-section">
+            <h3>🔧 Admin Tools</h3>
+            <div class="admin-links">
+                <a href="{{ url_for('admin_users') }}" class="admin-link">👥 Manage Users</a>
+                <a href="{{ url_for('admin_game_stats') }}" class="admin-link">📊 Game Statistics</a>
+                <a href="{{ url_for('play') }}" class="admin-link">🎮 Play Game</a>
+                <a href="{{ url_for('profile') }}" class="admin-link">👤 My Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h3>🕒 Recent Game Activity</h3>
+        {% if recent_games %}
+        <div class="games-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Score</th>
+                        <th>Questions</th>
+                        <th>Accuracy</th>
+                        <th>Difficulty</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in recent_games %}
+                    <tr>
+                        <td>{{ game.user.username }}</td>
+                        <td>{{ game.final_score }}</td>
+                        <td>{{ game.questions_answered }}</td>
+                        <td>{{ game.accuracy() }}%</td>
+                        <td>{{ game.max_difficulty.capitalize() }}</td>
+                        <td>{{ game.created_at.strftime('%m/%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No recent game activity.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

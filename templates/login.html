@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>🔐 Login</h1>
+    <p>Access your Mystery Digits account</p>
+</div>
+
+<div class="content">
+    <div style="max-width: 400px; margin: 0 auto;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ 'correct' if category == 'success' else 'wrong' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required 
+                       class="form-control" autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required 
+                       class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="remember"> Remember me
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-btn" style="width: 100%;">Login</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+            <p><a href="{{ url_for('index') }}">← Back to Home</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+.auth-form {
+    margin: 30px 0;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+.form-control:focus {
+    border-color: #3498db;
+    outline: none;
+}
+</style>
+{% endblock %}

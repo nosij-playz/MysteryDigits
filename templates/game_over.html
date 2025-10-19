@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>💀 Game Over 💀</h1>
+    <p>Your mystery digits journey has ended!</p>
+</div>
+
+<div class="content">
+    <div class="game-over">
+        <h2>Final Score</h2>
+        <div class="final-score">{{ final_score }}</div>
+        
+        <p>You decoded many mysterious numbers, but the digits have defeated you... for now!</p>
+        
+        <a href="/restart" class="restart-btn">🔄 Play Again</a>
+        
+        <div style="margin-top: 30px; font-size: 0.9em; color: #7f8c8d;">
+            <p>Can you beat your high score next time?</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

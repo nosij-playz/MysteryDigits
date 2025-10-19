@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>🔢 Mystery Digits 🔢</h1>
+    <p>Can you read the hidden numbers?</p>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <div>Score</div>
+        <div class="stat-value">{{ score }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Lives</div>
+        <div class="stat-value">❤️ × {{ lives }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Difficulty</div>
+        <div class="stat-value">{{ difficulty }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Answered</div>
+        <div class="stat-value">{{ questions_answered }}</div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="instructions">
+        <h3>🎯 How to Play:</h3>
+        <p>Look at the distorted image below and type what numbers you see. The game gets harder as your score increases!</p>
+    </div>
+
+    {% if message %}
+    <div class="message {{ 'correct' if was_correct else 'wrong' }}">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    <div class="digit-image">
+        <img src="{{ image_url }}" alt="Mystery digits - what do you see?" 
+             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkltYWdlIExvYWRpbmcuLi48L3RleHQ+PC9zdmc+'">
+    </div>
+
+    <form class="guess-form" action="/check_answer" method="POST">
+        <input type="text" 
+               class="guess-input" 
+               name="guess" 
+               placeholder="Enter numbers" 
+               required 
+               autofocus
+               autocomplete="off"
+               pattern="[0-9]+"
+               title="Please enter only numbers">
+        <button type="submit" class="submit-btn">Submit Guess</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/restart" style="color: #7f8c8d; text-decoration: none;">🔄 Restart Game</a>
+    </div>
+</div>
+{% endblock %}

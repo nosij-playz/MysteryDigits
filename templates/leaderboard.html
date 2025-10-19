@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - Mystery Digits{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Leaderboard -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-trophy"></i> Top Players
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Score</th>
+                                    <th>Level</th>
+                                    <th>Accuracy</th>
+                                    <th>Achievements</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in leaderboard %}
+                                <tr class="{% if session.player_name == player.player_name %}table-primary{% endif %}">
+                                    <td>
+                                        {% if loop.index == 1 %}
+                                            <i class="fas fa-crown text-warning"></i>
+                                        {% else %}
+                                            {{ loop.index }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ player.player_name }}</td>
+                                    <td>{{ player.total_score }}</td>
+                                    <td>{{ player.highest_level }}</td>
+                                    <td>{{ "%.1f"|format(player.average_accuracy) }}%</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-star"></i>
+                                            {{ player.achievement_points }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats & Achievements -->
+        <div class="col-lg-4">
+            <!-- Personal Stats -->
+            {% if session.player_name %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Your Stats
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="stat-item text-center p-2 rounded bg-light">
+                                <i class="fas fa-gamepad"></i>
+                                <h6>Games</h6>
+                                <strong>{{ player_stats.total_games }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item text-center p-2 rounded bg-light">
+                                <i class="fas fa-bullseye"></i>
+                                <h6>Accuracy</h6>
+                                <strong>{{ "%.1f"|format(player_stats.average_accuracy) }}%</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item text-center p-2 rounded bg-light">
+                                <i class="fas fa-fire"></i>
+                                <h6>Best Streak</h6>
+                                <strong>{{ player_stats.best_streak }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item text-center p-2 rounded bg-light">
+                                <i class="fas fa-trophy"></i>
+                                <h6>Best Level</h6>
+                                <strong>{{ player_stats.highest_level }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-medal"></i> Your Achievements
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if player_stats.achievements %}
+                        {% for achievement in player_stats.achievements %}
+                        <div class="achievement-card mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="achievement-icon fas fa-{{ achievement.icon }}"></i>
+                                <div class="flex-grow-1 ms-2">
+                                    <h6 class="mb-0">{{ achievement.name }}</h6>
+                                    <small class="text-muted">{{ achievement.description }}</small>
+                                </div>
+                                <span class="badge bg-success">+{{ achievement.points }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center text-muted">
+                            No achievements yet. Keep playing to earn them!
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="mb-3">Want to see your stats?</h5>
+                    <p>Start playing to get on the leaderboard!</p>
+                    <a href="{{ url_for('play') }}" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Play Now
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

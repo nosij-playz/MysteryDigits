@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>👤 User Profile</h1>
+    <p>Welcome back, {{ current_user.username }}!</p>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <div>Total Games</div>
+        <div class="stat-value">{{ stats.total_games }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Total Score</div>
+        <div class="stat-value">{{ stats.total_score }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Average Score</div>
+        <div class="stat-value">{{ stats.avg_score }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Member Since</div>
+        <div class="stat-value">{{ current_user.created_at.strftime('%Y-%m-%d') }}</div>
+    </div>
+</div>
+
+<div class="content">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="profile-section">
+            <h3>📊 Game Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_games }}</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_score }}</div>
+                    <div class="stat-label">Total Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.avg_score }}</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="profile-section">
+            <h3>👤 Account Info</h3>
+            <div class="info-card">
+                <p><strong>Username:</strong> {{ current_user.username }}</p>
+                <p><strong>Email:</strong> {{ current_user.email }}</p>
+                <p><strong>Last Login:</strong> {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else 'Never' }}</p>
+                <p><strong>Account Created:</strong> {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+                {% if current_user.is_admin %}
+                <p><strong>Role:</strong> <span style="color: #e74c3c;">Administrator</span></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-section">
+        <h3>🎮 Recent Games</h3>
+        {% if recent_games %}
+        <div class="games-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Questions</th>
+                        <th>Accuracy</th>
+                        <th>Difficulty</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in recent_games %}
+                    <tr>
+                        <td>{{ game.created_at.strftime('%m/%d %H:%M') }}</td>
+                        <td>{{ game.final_score }}</td>
+                        <td>{{ game.questions_answered }}</td>
+                        <td>{{ game.accuracy() }}%</td>
+                        <td>{{ game.max_difficulty.capitalize() }}</td>
+                        <td>{{ game.duration }}s</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No games played yet. <a href="{{ url_for('play') }}">Start playing!</a></p>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('play') }}" class="submit-btn">🎮 Play Game</a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}" class="submit-btn" style="background: #e74c3c;">⚙️ Admin Panel</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" class="submit-btn" style="background: #95a5a6;">🚪 Logout</a>
+    </div>
+</div>
+
+<style>
+.profile-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.stat-number {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #3498db;
+}
+.stat-label {
+    font-size: 0.9em;
+    color: #666;
+}
+.info-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+.games-table {
+    overflow-x: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background: #34495e;
+    color: white;
+}
+tr:hover {
+    background: #f5f5f5;
+}
+</style>
+{% endblock %}

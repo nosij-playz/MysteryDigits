@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>📊 Game Statistics</h1>
+    <p>Comprehensive game performance analytics</p>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <div>Total Sessions</div>
+        <div class="stat-value">{{ total_sessions }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Total Questions</div>
+        <div class="stat-value">{{ total_questions }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Correct Answers</div>
+        <div class="stat-value">{{ total_correct }}</div>
+    </div>
+    <div class="stat-item">
+        <div>Overall Accuracy</div>
+        <div class="stat-value">{{ overall_accuracy }}%</div>
+    </div>
+</div>
+
+<div class="content">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="admin-section">
+            <h3>🎯 Difficulty Distribution</h3>
+            {% if difficulty_stats %}
+            <div class="stats-grid">
+                {% for difficulty, count, avg_score in difficulty_stats %}
+                <div class="stat-card">
+                    <div class="stat-number">{{ count }}</div>
+                    <div class="stat-label">{{ difficulty.capitalize() }} Games</div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                        Avg: {{ "%.1f"|format(avg_score or 0) }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No game data available.</p>
+            {% endif %}
+        </div>
+        
+        <div class="admin-section">
+            <h3>📈 Performance Metrics</h3>
+            <div class="info-card">
+                <p><strong>Total Game Sessions:</strong> {{ total_sessions }}</p>
+                <p><strong>Total Questions Answered:</strong> {{ total_questions }}</p>
+                <p><strong>Total Correct Answers:</strong> {{ total_correct }}</p>
+                <p><strong>Overall Accuracy:</strong> {{ overall_accuracy }}%</p>
+                <p><strong>Average Questions per Game:</strong> {{ "%.1f"|format(total_questions / total_sessions if total_sessions > 0 else 0) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h3>🕒 Recent Game Sessions</h3>
+        {% if recent_sessions %}
+        <div class="games-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Score</th>
+                        <th>Questions</th>
+                        <th>Correct</th>
+                        <th>Accuracy</th>
+                        <th>Max Difficulty</th>
+                        <th>Duration</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in recent_sessions %}
+                    <tr>
+                        <td>{{ session.user.username }}</td>
+                        <td>{{ session.final_score }}</td>
+                        <td>{{ session.questions_answered }}</td>
+                        <td>{{ session.correct_answers }}</td>
+                        <td>{{ session.accuracy() }}%</td>
+                        <td>{{ session.max_difficulty.capitalize() }}</td>
+                        <td>{{ session.duration }}s</td>
+                        <td>{{ session.created_at.strftime('%m/%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No recent game sessions.</p>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('admin_dashboard') }}" class="submit-btn">← Back to Dashboard</a>
+        <a href="{{ url_for('admin_users') }}" class="submit-btn">👥 View Users</a>
+    </div>
+</div>
+{% endblock %}
