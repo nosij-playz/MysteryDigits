@@ -13,4 +13,5 @@ bcrypt
 blinker
 greenlet
 SQLAlchemy
+gunicorn
 typing_extensions
