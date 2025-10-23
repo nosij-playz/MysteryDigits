@@ -11,6 +11,29 @@ class Config:
     # Database configuration
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     DATABASE_PATH = os.path.join(BASE_DIR, 'mystery_digits.db')
+    # SQLAlchemy database URI. Prefer environment-provided DATABASE_URL, then MYSQL_URI,
+    # then individual MYSQL_* vars; fall back to a local SQLite file for development.
+    # Build DB URI only when explicitly requested or when environment provides it.
+    # Use environment variables if present; otherwise default to SQLite for local dev.
+    _env_db = os.environ.get('DATABASE_URL') or os.environ.get('MYSQL_URI')
+
+    if not _env_db:
+        # If explicit individual MYSQL_* vars are present, build a URI (PyMySQL driver)
+        if os.environ.get('MYSQL_USER') and os.environ.get('MYSQL_PASSWORD') and os.environ.get('MYSQL_HOST') and os.environ.get('MYSQL_PORT') and os.environ.get('MYSQL_DB'):
+            _env_db = (
+                f"mysql+pymysql://{os.environ.get('MYSQL_USER')}:{os.environ.get('MYSQL_PASSWORD')}@"
+                f"{os.environ.get('MYSQL_HOST')}:{os.environ.get('MYSQL_PORT')}/{os.environ.get('MYSQL_DB')}"
+            )
+
+    # If USE_MYSQL env var is set to a truthy value, allow fallback to the provided MySQL URI.
+    # This prevents the app from trying to contact the remote MySQL by default during local dev.
+    USE_MYSQL = os.environ.get('USE_MYSQL', '').lower() in ('1', 'true', 'yes')
+
+    if not _env_db and USE_MYSQL:
+        # Only use the hardcoded remote MySQL URI if explicitly opted-in via USE_MYSQL
+        _env_db = "mysql+pymysql://avnadmin:AVNS_Mw0V9t_g2KU5YDz6A_j@mysql-36242816-albinosiby1-4d7c.i.aivencloud.com:14436/defaultdb"
+
+    SQLALCHEMY_DATABASE_URI = _env_db or f"sqlite:///{DATABASE_PATH}"
     
     # Game configuration
     DIFFICULTY_LEVELS = {

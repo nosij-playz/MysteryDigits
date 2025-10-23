@@ -5,8 +5,14 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
 import numpy as np
 
 class ImageGenerator:
-    def __init__(self, output_dir="static/images/generated"):
-        self.output_dir = output_dir
+    def __init__(self, output_dir=None):
+        # Default to the static/images/generated folder located next to this module
+        if output_dir is None:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            output_dir = os.path.join(base_dir, 'static', 'images', 'generated')
+
+        # Ensure we always use an absolute path to avoid cwd-related surprises
+        self.output_dir = os.path.abspath(output_dir)
         self.ensure_directory_exists()
         
     def ensure_directory_exists(self):
@@ -43,11 +49,17 @@ class ImageGenerator:
                 font = ImageFont.load_default()
         
         # Calculate text position (centered)
-        bbox = draw.textbbox((0, 0), number_str, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        x = (width - text_width) // 2 - bbox[0]
-        y = (height - text_height) // 2 - bbox[1]
+        try:
+            bbox = draw.textbbox((0, 0), number_str, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x = (width - text_width) // 2 - bbox[0]
+            y = (height - text_height) // 2 - bbox[1]
+        except Exception:
+            # Older Pillow versions may not have textbbox; fallback to textsize
+            text_width, text_height = draw.textsize(number_str, font=font)
+            x = (width - text_width) // 2
+            y = (height - text_height) // 2
         
         # Draw the text
         text_color = self.get_contrasting_color(bg_color)
@@ -105,8 +117,9 @@ class ImageGenerator:
         width, height = image.size
         
         for _ in range(num_lines):
-            # Random line color (semi-transparent)
-            line_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 128)
+            # Random line color
+            # Use RGB tuples for drawing on an RGB image (avoid 4-tuple alpha which raises on some setups)
+            line_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             
             # Random start and end points
             x1 = random.randint(0, width)

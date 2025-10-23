@@ -6,11 +6,15 @@ import random
 import os
 from datetime import datetime, timedelta
 from image_generator import ImageGenerator
+from config import Config
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here-change-in-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mystery_digits.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Load settings from Config (which reads env vars if set)
+app.config.from_object(Config)
+# Ensure SQLAlchemy track modifications default is explicit
+app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
+# Secret key override (already in Config) – keep for backward compatibility
+app.secret_key = app.config.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
 # Initialize extensions
 db.init_app(app)
@@ -21,6 +25,26 @@ login_manager.login_message = 'Please log in to access this page.'
 
 # Initialize image generator
 image_gen = ImageGenerator()
+
+
+def get_generated_image_path(filename: str) -> str:
+    """Return absolute filesystem path for a generated image filename."""
+    return os.path.join(app.root_path, 'static', 'images', 'generated', filename)
+
+
+def ensure_image_for_state(game_state):
+    """Ensure the game_state has a valid current_image file; regenerate if missing."""
+    # If there's no image or the file does not exist on disk, regenerate it
+    if not getattr(game_state, 'current_image', None):
+        game_state.current_image = image_gen.generate_image(number=game_state.current_number,
+                                                            difficulty=game_state.difficulty)
+        return
+
+    image_path = get_generated_image_path(game_state.current_image)
+    if not os.path.exists(image_path):
+        # Regenerate into the correct static directory
+        game_state.current_image = image_gen.generate_image(number=game_state.current_number,
+                                                            difficulty=game_state.difficulty)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -210,8 +234,12 @@ def play():
     if random.random() < 0.1:
         image_gen.cleanup_old_images()
     
+    # Ensure the referenced image file exists and regenerate if missing (handles stale sessions)
+    ensure_image_for_state(game_state)
+    save_game_state(game_state)
+
     return render_template('play.html', 
-                         image_url=f"/static/images/generated/{game_state.current_image}",
+                         image_url=url_for('static', filename=f"images/generated/{game_state.current_image}"),
                          score=game_state.score,
                          lives=game_state.lives,
                          difficulty=game_state.difficulty.capitalize(),
@@ -247,13 +275,16 @@ def check_answer():
     )
     
     save_game_state(game_state)
+    # Ensure file exists (regen if something went wrong while storing session values)
+    ensure_image_for_state(game_state)
+    save_game_state(game_state)
     
     if game_state.lives <= 0:
         save_game_session(game_state)
         return redirect(url_for('game_over'))
     
     return render_template('play.html',
-                         image_url=f"/static/images/generated/{game_state.current_image}",
+                         image_url=url_for('static', filename=f"images/generated/{game_state.current_image}"),
                          score=game_state.score,
                          lives=game_state.lives,
                          difficulty=game_state.difficulty.capitalize(),
